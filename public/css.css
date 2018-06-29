@@ -1,0 +1,71 @@
+body {
+    background: linear-gradient(#000000bf, #ffffff);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+.bg-primary{
+	backround-color: blue;
+}
+
+.no-border {
+    border: 0px;
+}
+
+.card-custom {
+    margin: 0 auto;
+}
+
+.change-icon {
+    font-size: 21px;
+    margin: 0px 37px;
+    color: #2196f3;
+}
+
+.myinn {
+    border: 1px solid gainsboro;
+    height: 70px;
+}
+
+.custom-select {
+    width: 49% !important;
+    height: 70px;
+    border: 1px solid gainsboro;
+}
+
+.converUnit {
+    font-size: 15px;
+    background-color: #2196f3;
+    display: inline-block;
+    color: #400040;
+    padding: 3px 21px;
+    border-radius: 3px;
+}
+
+.bbl {
+    border-bottom: 1px solid gainsboro;
+}
+
+.bg-blue {
+    background-color: #400040;
+    min-height: 119px;
+    border-bottom: 4px solid #400040;
+}
+
+.text-white {
+    color: #400040;
+}
+
+.headerr {
+    padding: 14px 23px;
+    font-size: 20px;
+}
+
+@media only screen and (max-width: 640px) {
+    .change-icon {
+        display: none !important;
+    }
+    .custom-select {
+        width: 100% !important;
+    }
+}
