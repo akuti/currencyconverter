@@ -19,8 +19,7 @@ const getFromCurrencyValue = () => {
 };
 
 
-idSymbolFrom = 'Lek';
-idSymbolTo = 'Lek';
+
 
 
 
@@ -44,9 +43,8 @@ convert = (s) => {
 
             console.log(requestUrl);
 
-            document.getElementById("viewValue").innerHTML = `${idSymbolTo} ${Math.round(currencyConverted)}.00`;
+            document.getElementById("viewValue").innerHTML = `${Math.round(currencyConverted)}.00`;
 
-            document.getElementById("conversionUnit").innerHTML = `${idSymbolFrom} 1 = ${idSymbolTo}  ${Math.round(unitValue)} `;
         });
 
 }
@@ -61,9 +59,11 @@ if ('serviceWorker' in navigator) {
         })
         .then(registration => {
             console.log("Service Worker Registered", registration);
+            return;
         })
         .catch(err => {
             console.log("Service Worker failed to Register", err);
+            return;
         })
 }
 

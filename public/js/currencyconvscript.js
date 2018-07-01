@@ -47,7 +47,45 @@ convert = (s) => {
             document.getElementById("viewValue").innerHTML = `${idSymbolTo} ${Math.round(currencyConverted)}.00`;
 
             document.getElementById("conversionUnit").innerHTML = `${idSymbolFrom} 1 = ${idSymbolTo}  ${Math.round(unitValue)} `;
-        });
+            
+            let dbPromise = idb.open('currencyConverter', 1, (upgradeDb) =>{
+            	  if (!navigator.serviceWorker) {
+            	    return Promise.resolve();
+            	  };
+            	  if(!upgradeDb.objectStoreNames.contains('conversionRates')){
+            		  upgradeDb.createObjectStore('conversionRates', {autoIncrement: true});
+                      
+            	  }
+            	  });
+            dbPromise.then(db => {
+                const conversionRates = db.transaction('conversionRates', 'readwrite').objectStore('conversionRates');
+                conversionRates.put(currencyConverted);
+            })
+            dbPromise.then(db => {
+                const conversionRates = db.transaction('conversionRates', 'readwrite').objectStore('conversionRates');
+                conversionRates.put(query);
+            })
+        }).catch(() =>{
+            dbPromise.then((db) => {
+                let tx = db.transaction('conversionRates', 'readwrite');
+                let store = tx.objectStore('conversionRates');
+                return store.openCursor();
+              }).then(function continueCursoring(cursor) {
+                if (!cursor) {
+                  return;
+                }
+                
+                for (let field in cursor.value) {
+                  if(field === query){
+                    let cursorValue = cursor.value[field];
+                    let dbtotal = cursorValue * fromValue;
+                    let dbactualConversion = Math.round(dbtotal * 100)/100;
+                    resultValue.value = dbactualConversion.toFixed(2); 
+                  }
+                }
+                return cursor.continue().then(continueCursoring);
+              })
+        })
 
 }
 
@@ -68,7 +106,6 @@ if ('serviceWorker' in navigator) {
         })
 }
 
-// // Function for API Call
 
 fetch('https://free.currencyconverterapi.com/api/v5/countries')
     .then(response => response.json())
@@ -76,7 +113,6 @@ fetch('https://free.currencyconverterapi.com/api/v5/countries')
 
         let html = '';
         for (let country of Object.values(myJson.results)) {
-            // console.log(country);
             html += `<option id="${country.currencySymbol}" value="${country.currencyId}">${country.currencyName}</option>`;
         }
         el("#fromCurrency").insertAdjacentHTML('afterbegin', html);
@@ -99,12 +135,10 @@ showFromIdTwo = (s) => {
     convert()
 }
 
-// Toastr Diplay
 userConnection = () => {
     if (navigator.onLine) {
 
     } else {
-        // Display an info toast with no title
         toastr.warning(`Sorry Conversion can't be made offline`);
         toastr.options = {
             "positionClass": "toast-bottom-center"
@@ -113,7 +147,6 @@ userConnection = () => {
 }
 
 
-// IndexedDb initialization
 
 const dbPromise = idb.open('currencyConverter', 3, (upgradeDb) => {
     switch (upgradeDb.oldVersion) {
@@ -136,9 +169,7 @@ const dbPromise = idb.open('currencyConverter', 3, (upgradeDb) => {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-    /*
-     Fetch Countries 
-      */
+
     fetch('https://free.currencyconverterapi.com/api/v5/countries')
         .then(res => res.json())
         .then(res => {
@@ -152,7 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const countries = db.transaction('countries', 'readwrite').objectStore('countries');
                 const countriesIndex = countries.index('country');
                 countriesIndex.getAll().then(currencies => {
-                    // fetchCountries(currencies);
                 })
             })
         }).catch(() => {
@@ -160,7 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const countries = db.transaction('countries').objectStore('countries');
                 const countriesIndex = countries.index('country');
                 countriesIndex.getAll().then(currencies => {
-                    // fetchCountries(currencies);
                 })
 
             });
