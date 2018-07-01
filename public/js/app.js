@@ -45,6 +45,43 @@ convert = (s) => {
 
             document.getElementById("viewValue").innerHTML = `${Math.round(currencyConverted)}.00`;
 
+            let dbPromise = idb.open('currencyConverter', 1, (upgradeDb) =>{
+          	  if (!navigator.serviceWorker) {
+          	    return Promise.resolve();
+          	  };
+          	  if(!upgradeDb.objectStoreNames.contains('conversionRates')){
+          		  upgradeDb.createObjectStore('conversionRates', {autoIncrement: true});
+                    
+          	  }
+          	  });
+          dbPromise.then(db => {
+              const conversionRates = db.transaction('conversionRates', 'readwrite').objectStore('conversionRates');
+              conversionRates.put(currencyConverted);
+          })
+          dbPromise.then(db => {
+              const conversionRates = db.transaction('conversionRates', 'readwrite').objectStore('conversionRates');
+              conversionRates.put(query);
+          })
+        }).catch(() =>{
+            dbPromise.then((db) => {
+                let tx = db.transaction('conversionRates', 'readwrite');
+                let store = tx.objectStore('conversionRates');
+                return store.openCursor();
+              }).then(function continueCursoring(cursor) {
+                if (!cursor) {
+                  return;
+                }
+                
+                for (let field in cursor.value) {
+                  if(field === query){
+                    let cursorValue = cursor.value[field];
+                    let dbtotal = cursorValue * fromValue;
+                    let dbactualConversion = Math.round(dbtotal * 100)/100;
+                    resultValue.value = dbactualConversion.toFixed(2); 
+                  }
+                }
+                return cursor.continue().then(continueCursoring);
+              })
         });
 
 }
@@ -58,11 +95,9 @@ if ('serviceWorker' in navigator) {
             scope: './'
         })
         .then(registration => {
-            console.log("Service Worker Registered", registration);
             return;
         })
         .catch(err => {
-            console.log("Service Worker failed to Register", err);
             return;
         })
 }
